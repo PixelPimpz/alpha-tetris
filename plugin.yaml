@@ -1,0 +1,8 @@
+name: "alpha-tetris"
+title: "aTetris"
+icon: "plug"
+enabled: "ON"
+unit: "none"
+only_main: 1
+start: "init.sh"
+ui: "init"
