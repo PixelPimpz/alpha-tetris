@@ -16,7 +16,7 @@ for (( i=0; i < W*H; i++ )); do
   BOARD[i]="0"
 done
 CURSHAPE="" PX=0 PY=0 PTYPE=1 NEXT_TYPE=$(( RANDOM % 7 + 1 ))
-SCORE=0 LINES=0 LEVEL=1
+SCORE=0 CLEARED=0 LEVEL=1
 
 trap 'stty echo 2>/dev/null; printf "\e[?25h\e[0m"' EXIT INT TERM
 stty -echo 2>/dev/null; printf '\e[?25l\e[2J'
@@ -89,8 +89,8 @@ rm_line() {
     fi
   done
   if (( cleared > 0 )); then
-    (( LINES += cleared ))
-    LEVEL=$(( LINES / 10 + 1 ))
+    (( CLEARED += cleared ))
+    LEVEL=$(( CLEARED / 10 + 1 ))
     (( SCORE += pts[cleared] * LEVEL ))
   fi
 }
@@ -120,10 +120,24 @@ draw() {
       1) frame+="   SCORE" ;;
       2) printf -v hud "  %06d" "$SCORE"; frame+="$hud" ;;
       4) frame+="   LINES" ;;
-      5) printf -v hud "  %d" "$LINES"; frame+="$hud" ;;
+      5) printf -v hud "  %d" "$CLEARED"; frame+="$hud" ;;
       7) frame+="   LEVEL" ;;
       8) printf -v hud "  %d" "$LEVEL"; frame+="$hud" ;;
       10) frame+="   NEXT" ;;
+      12|13)
+        local ny=$(( y - 12 )) nx hit
+        frame+="  "
+        for (( nx = -1; nx <= 2; nx++ )); do
+          hit=0
+          for cell in ${SHAPES[$NEXT_TYPE]}; do
+            [[ "$cell" == "${nx},${ny}" ]] && { hit=1; break; }
+          done
+          if (( hit )); then
+            frame+="${COLORS[$NEXT_TYPE]}${CELL}${RESET}"
+          else
+            frame+="  "
+          fi
+        done ;;
     esac
     frame+=$'\e[K\n'
   done
@@ -134,7 +148,7 @@ draw() {
 
 main() {
   local key rest tick
-  local ticks=("" "0.50" "0.42" "0.35" "0.28" "0.22" "0.17" "0.13" "0.10" "0.08")
+  local ticks=("" "1.20" "1.05" "0.90" "0.75" "0.62" "0.50" "0.40" "0.30" "0.22")
   spawn || return 0
   # main game loop
   while true; do
