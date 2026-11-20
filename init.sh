@@ -44,16 +44,15 @@ init() {
 }
 
 start() {
-# shellcheck disable=SC2178
-  local -n ctx="$1"
+  local -n _ctx="$1"
   local key
-  for key in "${!ctx[@]}"; do
-    if [[ "${ctx[$key]}" == "FAIL" ]]; then
+  for key in "${!_ctx[@]}"; do
+    if [[ "${_ctx[$key]}" == "FAIL" ]]; then
       pu_toast -t "aTetris" -d 2.0 "Preflight failed: $key"
       return 1
     fi
   done
-  popped "" "aTetris" "d" 36 26 env ATETRIS_SCORES="${ctx[scores]}" "${ctx[bin_path]}"
+  popped "" "aTetris" "d" 36 26 env ATETRIS_SCORES="${_ctx[scores]}" "${_ctx[bin_path]}"
 }
 
 [[ "${BASH_SOURCE[0]}" == "${0}" ]] && init "$@"
