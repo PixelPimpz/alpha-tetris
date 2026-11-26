@@ -8,20 +8,31 @@
 _ALPHA_ATETRIS_SH=1
 
 ## SETUP
-W=10 H=20 CELL="  " RESET=$'\e[0m'
+W=10 H=20 
+CELL="  " 
+RESET=$'\e[0m'
 COLORS=("" $'\e[48;5;51m' $'\e[48;5;226m' $'\e[48;5;129m' $'\e[48;5;46m' $'\e[48;5;196m' $'\e[48;5;21m' $'\e[48;5;208m')
 SHAPES=("" "-1,0 0,0 1,0 2,0" "0,0 1,0 0,1 1,1" "-1,0 0,0 1,0 0,1" "0,0 1,0 -1,1 0,1" "-1,0 0,0 0,1 1,1" "-1,0 0,0 1,0 1,1" "-1,0 0,0 1,0 -1,1")
 BOARD=()
+CURSHAPE="" PX=0 PY=0 PTYPE=1 NEXT_TYPE=$(( RANDOM % 7 + 1 ))
+SCORE=0 CLEARED=0 LEVEL=1
+
+## DEFINE BOARD
 for (( i=0; i < W*H; i++ )); do
   BOARD[i]="0"
 done
-CURSHAPE="" PX=0 PY=0 PTYPE=1 NEXT_TYPE=$(( RANDOM % 7 + 1 ))
-SCORE=0 CLEARED=0 LEVEL=1
+
 
 trap 'stty echo 2>/dev/null; printf "\e[?25h\e[0m"' EXIT INT TERM
 stty -echo 2>/dev/null; printf '\e[?25l\e[2J'
 
 ## FUNCTIONS
+get_color() {
+  local format xrgb="${1:-FFFFFF}"
+  printf -v format '\e[48;2;%d;%d;%dm' "0x${xrgb:0:2}" "0x${xrgb:3:2}" "0x${xrgb:5:2}"
+  printf "%s" "$format"
+}
+
 placeable() {
   local px="${1:-0}" py="${2:-0}" shape="$3"
   local cell dx dy x y
